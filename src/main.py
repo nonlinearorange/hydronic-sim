@@ -1,86 +1,15 @@
-from dataclasses import dataclass
+from matplotlib import pyplot as plt
 
-
-class MaterialKind:
-    COPPER = 1
-    ALUMINUM = 2
-    CARBON_STEEL = 3
-    GLASS = 4,
-    PLASTICS = 5,
-    WATER = 6,
-    AIR = 7,
-    WOOD = 8,
-    CONCRETE = 9,
-    ZIRCONIUM_BRICK = 10,
-    STEEL = 40
-
-
-@dataclass
-class Material:
-    kind: MaterialKind
-    thermal_conductivity: float
-
-
-class MaterialFactory:
-    @staticmethod
-    def create(kind):
-        if kind == MaterialKind.COPPER:
-            return Material(kind, 399.0)
-        elif kind == MaterialKind.GLASS:
-            return Material(kind, 0.81)
-        elif kind == MaterialKind.ZIRCONIUM_BRICK:
-            return Material(kind, 2.5)
-        elif kind == MaterialKind.STEEL:
-            return Material(kind, 40.0)
-        elif kind == MaterialKind.AIR:
-            return Material(kind, 0.026)
-        else:
-            raise ValueError(kind)
-
-
-class Layer:
-    def __init__(self, material: Material, thickness):
-        self.material = material
-        self.thickness = thickness
-
-
-class Surface:
-    def __init__(self):
-        self.layers: [Layer] = []
-        self.width = 0.0
-        self.height = 0.0
-
-    def update_area(self, width, height):
-        self.width = width
-        self.height = height
-        return self.calculate_area()
-
-    def calculate_area(self):
-        return self.width * self.height
-
-    def add_layer(self, material_kind, thickness: float):
-        material = MaterialFactory.create(material_kind)
-        layer = Layer(material, thickness)
-        self.layers.append(layer)
-
-    def calculate_thermal_resistance_to_conduction(self):
-        area = self.calculate_area()
-        total = 0.0
-        for layer in self.layers:
-            total += layer.thickness / (layer.material.thermal_conductivity * area)
-
-        return total
-
-    # For now, it assumes a series physical model.
-    def calculate_total_thermal_conductivity(self):
-        return sum(layer.material.thermal_conductivity for layer in self.layers)
+from solar.geometry.solar_geometry_predictor import SolarGeometryPredictor
+from thermal.material_kind import MaterialKind
+from thermal.surface import Surface
 
 
 def calculate_rate_heat_loss(temp_1, temp_2, thermal_resistance):
     return (temp_1 - temp_2) / thermal_resistance
 
 
-def main():
+def execute_thermal_sample():
     surface = Surface()
     surface.add_layer(MaterialKind.GLASS, 0.004)
     surface.add_layer(MaterialKind.AIR, 0.01)
@@ -95,6 +24,36 @@ def main():
 
     rate = calculate_rate_heat_loss(24.5, 24.0, resistance_to_conduction)
     print(f"Rate of Heat Loss: {rate}")
+
+
+def plot_solar_declination():
+    days = [day for day in range(1, 365)]
+    solar_declination = [SolarGeometryPredictor.calculate_solar_declination(day) for day in days]
+    plt.plot(days, solar_declination)
+    plt.title("Solar Declination")
+    plt.ylabel("Declination Angle (degrees)")
+    plt.xlabel("Day Number")
+    plt.show()
+
+
+def execute_specific_example():
+    predictor = SolarGeometryPredictor(40.0, 167, 14)
+    predictor.predict()
+
+    print(f'Solar Hour Angle: {predictor.hour_angle}°')
+    print(f'Solar Declination: {predictor.solar_declination}°')
+    print(f'Solar Altitude: {predictor.solar_altitude}°')
+    print(f'Solar Azimuth: {predictor.solar_azimuth}°')
+
+
+def execute_solar_geometry_sample():
+    plot_solar_declination()
+    execute_specific_example()
+
+
+def main():
+    # execute_thermal_sample()
+    execute_solar_geometry_sample()
 
 
 if __name__ == "__main__":
