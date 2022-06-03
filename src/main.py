@@ -36,6 +36,10 @@ def plot_solar_declination():
     plt.show()
 
 
+def plot_sun_path_diagram():
+    pass
+
+
 def execute_specific_example():
     predictor = SolarGeometryPredictor(40.0, 167, 14)
     predictor.predict()
@@ -53,7 +57,8 @@ def execute_solar_geometry_sample():
 
 def main():
     # execute_thermal_sample()
-    execute_solar_geometry_sample()
+    # execute_solar_geometry_sample()
+    plot_sun_path_diagram()
 
 
 if __name__ == "__main__":
